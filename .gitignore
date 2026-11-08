@@ -1,0 +1,13 @@
+node_modules/
+dist/
+release/
+.local/
+*.log
+*.sqlite*
+*.db*
+.env
+.env.*
+!.env.example
+.gradle/
+build/
+*.tsbuildinfo
