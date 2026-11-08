@@ -92,7 +92,15 @@ try {
   await page
     .getByRole("button", { name: "Zielordner wählen und erstellen" })
     .click();
-  await page.getByRole("heading", { name: "relay_hud", exact: true }).waitFor();
+  await Promise.race([
+    page.getByRole("heading", { name: "relay_hud", exact: true }).waitFor(),
+    page
+      .locator(".modal .warn")
+      .waitFor()
+      .then(async () => {
+        throw Error(await page.locator(".modal .warn").innerText());
+      }),
+  ]);
   assert.equal(
     fs
       .readFileSync(

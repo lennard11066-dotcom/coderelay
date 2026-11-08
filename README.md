@@ -23,6 +23,8 @@ node scripts/smoke.mjs --packaged
 
 Der Installer entsteht im Ordner `release`. Die Sperrdatei legt die npm-Abhängigkeiten fest. Beim ersten Build lädt Electron seine Windows-Laufzeit, electron-builder lädt die passenden Packwerkzeuge. Der CI-Workflow baut den Installer aus einem frischen Checkout. Zeitstempel und Packmetadaten können zwischen Builds variieren.
 
+Falls ein Release-Download mit HTTP 504 abbricht, in PowerShell `.\scripts\windows-tools.ps1 Desktop` ausführen und den Build wiederholen. Für das Gradle-Beispiel gibt es `.\scripts\windows-tools.ps1 Fabric`. Beide Varianten beziehen die benötigten Buildwerkzeuge über die offizielle GitHub-Release-API und prüfen SHA-256 vor der Verwendung.
+
 ## Erster Auftrag
 
 1. **Projekt öffnen** wählen. Das kann ein leerer Ordner für eine neue Website, App oder einen Python-Bot sein oder ein bestehendes Git-Projekt. Der Explorer zeigt Dateien im ausgewählten Ordner. Strg+S speichert die aktive Editor-Datei.
