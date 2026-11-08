@@ -1,0 +1,62 @@
+{
+  "name": "coderelay",
+  "productName": "CodeRelay",
+  "version": "1.0.0",
+  "description": "Lokale Entwicklungsumgebung mit KI-Modellübergabe",
+  "author": "CodeRelay",
+  "private": true,
+  "type": "module",
+  "main": "desktop/main.mjs",
+  "scripts": {
+    "start": "npm run build && electron .",
+    "build": "tsc --noEmit && vite build",
+    "test": "node --test tests/*.test.mjs",
+    "installer": "npm run build && node scripts/runtime.cjs && electron-builder --win nsis --x64 --publish never",
+    "test:fabric": "node scripts/test-fabric.mjs"
+  },
+  "dependencies": {
+    "diff": "^8.0.2",
+    "ignore": "^7.0.14"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "electron": "45.2.3",
+    "electron-builder": "^26.0.12",
+    "lucide-react": "^0.468.0",
+    "monaco-editor": "0.52.2",
+    "playwright-core": "^1.65.0",
+    "prettier": "^3.9.10",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.0"
+  },
+  "build": {
+    "electronDist": "node_modules/electron/dist",
+    "appId": "studio.coderelay.desktop",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "desktop/**/*",
+      "dist/**/*",
+      "assets/**/*",
+      "fabric/**/*",
+      "package.json"
+    ],
+    "win": {
+      "icon": "assets/icon.ico",
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerLanguages": [
+        "de_DE"
+      ],
+      "language": "1031"
+    },
+    "artifactName": "CodeRelay-Setup-${version}-${arch}.${ext}"
+  }
+}

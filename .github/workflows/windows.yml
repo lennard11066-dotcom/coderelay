@@ -1,0 +1,45 @@
+name: Windows und Fabric
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.22.1
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run installer
+      - run: node scripts/smoke.mjs --packaged
+      - uses: actions/upload-artifact@v7
+        with:
+          name: CodeRelay-Windows-x64
+          path: release/CodeRelay-Setup-*-x64.exe
+          if-no-files-found: error
+  minecraft:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.22.1
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+      - run: node scripts/test-fabric.mjs
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Fabric-HUD-1.21.1
+          path: .local/fabric-*/relay_hud/build/libs/relay_hud-1.0.0.jar
+          include-hidden-files: true
+          if-no-files-found: error

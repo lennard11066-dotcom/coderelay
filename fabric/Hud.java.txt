@@ -1,0 +1,60 @@
+package PACKAGE_NAME;
+
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.Minecraft;
+import org.lwjgl.glfw.GLFW;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.io.IOException;
+import java.util.Properties;
+
+public class Hud implements ClientModInitializer {
+    private static final Path SETTINGS = FabricLoader.getInstance().getConfigDir().resolve("MOD_ID-hud.properties");
+    private static int x = 8, y = 8, offsetX, offsetY;
+    private static boolean dragging, wasDown;
+
+    public void onInitializeClient() { register(); }
+
+    public static void register() {
+        Properties saved = new Properties();
+        if (Files.exists(SETTINGS)) {
+            try (var input = Files.newInputStream(SETTINGS)) {
+                saved.load(input);
+                x = Integer.parseInt(saved.getProperty("x", "8"));
+                y = Integer.parseInt(saved.getProperty("y", "8"));
+            } catch (IOException | NumberFormatException ignored) {}
+        }
+        HudRenderCallback.EVENT.register((graphics, clock) -> {
+            Minecraft game = Minecraft.getInstance();
+            if (game.player == null || game.options.hideGui) return;
+            var position = game.player.blockPosition();
+            String label = "XYZ  " + position.getX() + " / " + position.getY() + " / " + position.getZ() + "   •   " + game.getFps() + " FPS";
+            var window = game.getWindow();
+            int width = game.font.width(label) + 12;
+            int mouseX = (int)(game.mouseHandler.xpos() * window.getGuiScaledWidth() / window.getScreenWidth());
+            int mouseY = (int)(game.mouseHandler.ypos() * window.getGuiScaledHeight() / window.getScreenHeight());
+            boolean down = game.screen != null && GLFW.glfwGetMouseButton(window.getWindow(), GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
+            if (down && !wasDown && mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + 20) {
+                dragging = true;
+                offsetX = mouseX - x;
+                offsetY = mouseY - y;
+            }
+            if (dragging && down) { x = mouseX - offsetX; y = mouseY - offsetY; }
+            x = Math.max(0, Math.min(x, window.getGuiScaledWidth() - width));
+            y = Math.max(0, Math.min(y, window.getGuiScaledHeight() - 20));
+            if (dragging && !down) {
+                dragging = false;
+                saved.setProperty("x", Integer.toString(x));
+                saved.setProperty("y", Integer.toString(y));
+                try (var output = Files.newOutputStream(SETTINGS)) { saved.store(output, "HUD"); }
+                catch (IOException e) { System.err.println("HUD-Position konnte nicht gespeichert werden."); }
+            }
+            wasDown = down;
+            graphics.fill(x,y,x+width,y+20,0xb0161826);
+            graphics.fill(x,y,x+2,y+20,0xff9f89ff);
+            graphics.drawString(game.font,label,x+6,y+6,0xffffffff);
+        });
+    }
+}
